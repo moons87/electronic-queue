@@ -100,13 +100,22 @@ export function TicketCard({
             </>
           )}
 
-          {called && (
+          {mine.status === "called" && (
             <div className="glow mt-6 rounded-2xl border border-brass-400 bg-brass-400/15 p-6">
               <p className="text-lg font-semibold text-wine-800">🔔 Вас вызывают</p>
               <p className="font-display mt-1 text-4xl font-bold text-wine-700">
                 {counterName}
               </p>
               <p className="mt-2 text-sm text-ink-soft">Подойдите, пожалуйста</p>
+            </div>
+          )}
+
+          {mine.status === "serving" && (
+            <div className="mt-6 rounded-2xl border border-wine-700/20 bg-wine-50 p-6">
+              <p className="text-lg font-semibold text-wine-800">Идёт приём</p>
+              <p className="font-display mt-1 text-4xl font-bold text-wine-700">
+                {counterName}
+              </p>
             </div>
           )}
 

@@ -64,6 +64,12 @@ export async function callNextAction(counterId: string): Promise<Ticket | null> 
   return data as Ticket | null;
 }
 
+export async function startServingAction(ticketId: string): Promise<void> {
+  const sb = await createClient();
+  const { error } = await sb.rpc("start_serving", { p_ticket_id: ticketId });
+  if (error) throw new Error(error.message);
+}
+
 export async function recallAction(ticketId: string): Promise<void> {
   const sb = await createClient();
   const { error } = await sb.rpc("recall_ticket", { p_ticket_id: ticketId });

@@ -3,7 +3,7 @@
 import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
 import { selectNextWaiting } from "@/lib/queue/nextWaiting";
 import {
-  callNextAction, recallAction, finishAction, noShowAction,
+  callNextAction, startServingAction, recallAction, finishAction, noShowAction,
 } from "@/app/actions";
 import type { Counter } from "@/lib/queue/types";
 import { useTransition } from "react";
@@ -21,6 +21,13 @@ export function OperatorPanel({ counter }: { counter: Counter }) {
 
   const run = (fn: () => Promise<unknown>) => () => start(() => { fn(); });
 
+  // Подпись текущего состояния
+  const stateLabel = !current
+    ? "Окно свободно"
+    : current.status === "called"
+    ? "Вызван, ожидает у окна"
+    : "Идёт приём";
+
   return (
     <main className="mx-auto max-w-md px-5 py-8">
       <div className="flex items-end justify-between">
@@ -37,9 +44,7 @@ export function OperatorPanel({ counter }: { counter: Counter }) {
       </div>
 
       <div className="card my-6 rounded-3xl p-7 text-center">
-        <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">
-          Сейчас обслуживается
-        </p>
+        <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">{stateLabel}</p>
         <p className="tnum font-display mt-1 text-6xl font-extrabold text-wine-700">
           {current?.number ?? "—"}
         </p>
@@ -48,30 +53,44 @@ export function OperatorPanel({ counter }: { counter: Counter }) {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <button disabled={pending}
+      {/* Шаги зависят от состояния талона */}
+      {!current && (
+        <button disabled={pending || !next}
           onClick={run(() => callNextAction(counter.id))}
-          className="btn-wine rounded-2xl p-4 text-lg font-semibold">
-          Вызвать следующего
+          className="btn-wine w-full rounded-2xl p-4 text-lg font-semibold">
+          {next ? "Вызвать следующего" : "Очередь пуста"}
         </button>
-        <div className="grid grid-cols-3 gap-2">
-          <button disabled={pending || !current}
-            onClick={run(() => recallAction(current!.id))}
-            className="rounded-xl border border-brass-500 bg-brass-400/15 p-3 font-semibold text-brass-600 transition hover:bg-brass-400/25 disabled:opacity-40">
-            Повторно
+      )}
+
+      {current?.status === "called" && (
+        <div className="flex flex-col gap-3">
+          <button disabled={pending}
+            onClick={run(() => startServingAction(current.id))}
+            className="btn-wine w-full rounded-2xl p-4 text-lg font-semibold">
+            Начать обслуживание
           </button>
-          <button disabled={pending || !current}
-            onClick={run(() => finishAction(current!.id))}
-            className="rounded-xl border border-wine-700/30 bg-wine-50 p-3 font-semibold text-wine-700 transition hover:bg-wine-100 disabled:opacity-40">
-            Завершить
-          </button>
-          <button disabled={pending || !current}
-            onClick={run(() => noShowAction(current!.id))}
-            className="rounded-xl border border-line bg-white p-3 font-semibold text-ink-soft transition hover:bg-paper-2 disabled:opacity-40">
-            Не явился
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button disabled={pending}
+              onClick={run(() => recallAction(current.id))}
+              className="rounded-xl border border-brass-500 bg-brass-400/15 p-3 font-semibold text-brass-600 transition hover:bg-brass-400/25 disabled:opacity-40">
+              Вызвать повторно
+            </button>
+            <button disabled={pending}
+              onClick={run(() => noShowAction(current.id))}
+              className="rounded-xl border border-line bg-white p-3 font-semibold text-ink-soft transition hover:bg-paper-2 disabled:opacity-40">
+              Не явился
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {current?.status === "serving" && (
+        <button disabled={pending}
+          onClick={run(() => finishAction(current.id))}
+          className="btn-wine w-full rounded-2xl p-4 text-lg font-semibold">
+          Завершить приём
+        </button>
+      )}
     </main>
   );
 }

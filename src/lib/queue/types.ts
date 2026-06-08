@@ -26,5 +26,6 @@ export interface Ticket {
   service_day: string;
   created_at: string;
   called_at: string | null;
+  served_at: string | null;
   finished_at: string | null;
 }

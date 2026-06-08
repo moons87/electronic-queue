@@ -43,6 +43,11 @@ export function SiteHeader() {
     router.refresh();
   }
 
+  // Навигация — только на страницах сотрудников. На экране абитуриента шапка
+  // чистая: лого + название, без «Табло» и «Вход для сотрудников».
+  const isStaff =
+    pathname.startsWith("/operator") || pathname.startsWith("/admin");
+
   const panel = role === "admin"
     ? { href: "/admin", label: "Админ" }
     : { href: "/operator", label: "Оператор" };
@@ -65,32 +70,22 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1 text-sm">
-          <Link href="/board" className={`hidden sm:block ${navLink}`}>
-            Табло
-          </Link>
-
-          {ready && role ? (
-            <>
-              <Link href={panel.href} className={navLink}>
-                {panel.label}
-              </Link>
-              <button
-                onClick={signOut}
-                className="rounded-lg border border-wine-700/30 px-4 py-2 font-semibold text-wine-700 transition hover:bg-wine-700 hover:text-paper"
-              >
-                Выйти
-              </button>
-            </>
-          ) : (
-            <Link
-              href="/login"
+        {isStaff && ready && role && (
+          <nav className="flex items-center gap-1 text-sm">
+            <Link href={panel.href} className={navLink}>
+              {panel.label}
+            </Link>
+            <Link href="/board" className={`hidden sm:block ${navLink}`}>
+              Табло
+            </Link>
+            <button
+              onClick={signOut}
               className="rounded-lg border border-wine-700/30 px-4 py-2 font-semibold text-wine-700 transition hover:bg-wine-700 hover:text-paper"
             >
-              Вход для сотрудников
-            </Link>
-          )}
-        </nav>
+              Выйти
+            </button>
+          </nav>
+        )}
       </div>
     </header>
   );

@@ -24,8 +24,8 @@ export async function getDayStats(sb: SupabaseClient): Promise<DayStats> {
     .filter((t) => t.called_at)
     .map((t) => (Date.parse(t.called_at!) - Date.parse(t.created_at)) / 60000);
   const serviceMin = tickets
-    .filter((t) => t.called_at && t.finished_at)
-    .map((t) => (Date.parse(t.finished_at!) - Date.parse(t.called_at!)) / 60000);
+    .filter((t) => t.finished_at && (t.served_at || t.called_at))
+    .map((t) => (Date.parse(t.finished_at!) - Date.parse((t.served_at || t.called_at)!)) / 60000);
 
   return {
     served, noShow,
