@@ -46,56 +46,65 @@ export function OperatorManager({
     });
   }
 
-  return (
-    <section className="mb-8">
-      <h2 className="mb-3 text-lg font-semibold">Сотрудники</h2>
+  const field =
+    "rounded-xl border border-line bg-white px-3 py-2.5 outline-none transition focus:border-wine-500 focus:ring-2 focus:ring-wine-500/20";
 
-      <ul className="mb-4 divide-y rounded-xl border">
+  return (
+    <section>
+      <h2 className="font-display mb-3 text-lg font-bold text-wine-800">Сотрудники</h2>
+
+      <ul className="card mb-4 divide-y divide-line rounded-2xl">
         {operators.map((o) => (
-          <li key={o.user_id} className="flex items-center justify-between p-3">
-            <span>
-              {o.email} — {o.role === "admin" ? "админ" : "оператор"}
-              {o.role !== "admin" && ` · ${counterName(o.counter_id)}`}
+          <li key={o.user_id} className="flex items-center justify-between gap-3 p-3.5">
+            <span className="min-w-0">
+              <span className="block truncate font-medium text-ink">{o.email}</span>
+              <span className="text-xs text-ink-soft">
+                {o.role === "admin"
+                  ? "администратор"
+                  : `оператор · ${counterName(o.counter_id)}`}
+              </span>
             </span>
             <button
               disabled={pending}
               onClick={() => remove(o.user_id)}
-              className="text-sm text-red-600 disabled:opacity-50"
+              className="shrink-0 rounded-lg px-2.5 py-1 text-sm text-wine-600 transition hover:bg-wine-50 disabled:opacity-50"
             >
               Удалить
             </button>
           </li>
         ))}
         {operators.length === 0 && (
-          <li className="p-3 text-gray-400">Пока нет сотрудников</li>
+          <li className="p-3.5 text-sm text-ink-soft">Пока нет сотрудников</li>
         )}
       </ul>
 
-      <div className="rounded-xl border p-4">
-        <h3 className="mb-3 font-semibold">Добавить сотрудника</h3>
-        <div className="flex flex-col gap-2">
-          <input className="rounded border p-2" placeholder="Email"
+      <div className="card rounded-2xl p-5">
+        <h3 className="mb-3 font-semibold text-ink">Добавить сотрудника</h3>
+        <div className="flex flex-col gap-2.5">
+          <input className={field} placeholder="Email" type="email"
             value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input className="rounded border p-2" type="text" placeholder="Пароль"
+          <input className={field} type="text" placeholder="Пароль"
             value={password} onChange={(e) => setPassword(e.target.value)} />
-          <select className="rounded border p-2" value={role}
-            onChange={(e) => setRole(e.target.value as "operator" | "admin")}>
-            <option value="operator">Оператор</option>
-            <option value="admin">Админ</option>
-          </select>
-          {role === "operator" && (
-            <select className="rounded border p-2" value={counterId}
-              onChange={(e) => setCounterId(e.target.value)}>
-              {counters.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
+          <div className="grid grid-cols-2 gap-2.5">
+            <select className={field} value={role}
+              onChange={(e) => setRole(e.target.value as "operator" | "admin")}>
+              <option value="operator">Оператор</option>
+              <option value="admin">Админ</option>
             </select>
-          )}
+            {role === "operator" && (
+              <select className={field} value={counterId}
+                onChange={(e) => setCounterId(e.target.value)}>
+                {counters.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
           <button disabled={pending} onClick={add}
-            className="rounded-xl bg-blue-600 p-3 font-semibold text-white disabled:opacity-50">
+            className="btn-wine mt-1 rounded-xl px-4 py-2.5 font-semibold">
             Добавить
           </button>
-          {msg && <p className="text-sm text-gray-700">{msg}</p>}
+          {msg && <p className="text-sm text-ink-soft">{msg}</p>}
         </div>
       </div>
     </section>

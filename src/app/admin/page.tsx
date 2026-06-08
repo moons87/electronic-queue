@@ -20,31 +20,45 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-2xl font-bold">Администрирование</h1>
+    <main className="mx-auto max-w-2xl px-5 py-8">
+      <h1 className="font-display mb-1 text-2xl font-bold text-wine-800">
+        Администрирование
+      </h1>
+      <p className="mb-6 text-sm text-ink-soft">Статистика за сегодня и сотрудники</p>
 
-      <section className="mb-8 grid grid-cols-2 gap-4">
+      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Обслужено" value={stats.served} />
         <Stat label="Не явились" value={stats.noShow} />
-        <Stat label="Ср. ожидание" value={`${stats.avgWaitMin} мин`} />
-        <Stat label="Ср. обслуживание" value={`${stats.avgServiceMin} мин`} />
+        <Stat label="Ср. ожидание" value={`${stats.avgWaitMin}м`} />
+        <Stat label="Ср. приём" value={`${stats.avgServiceMin}м`} />
       </section>
 
-      <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">Направления</h2>
-        <ul className="list-disc pl-5">
-          {services.map((s) => <li key={s.id}>{s.name} ({s.prefix})</li>)}
-        </ul>
-      </section>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <section className="card rounded-2xl p-5">
+          <h2 className="mb-3 font-semibold text-wine-800">Направления</h2>
+          <ul className="space-y-1 text-sm">
+            {services.map((s) => (
+              <li key={s.id} className="flex items-center gap-2">
+                <span className="font-display grid size-6 place-items-center rounded-md bg-wine-700 text-xs font-bold text-paper">
+                  {s.prefix}
+                </span>
+                {s.name}
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold">Окна</h2>
-        <ul className="list-disc pl-5">
-          {counters.map((c) => <li key={c.id}>{c.name}</li>)}
-        </ul>
-      </section>
+        <section className="card rounded-2xl p-5">
+          <h2 className="mb-3 font-semibold text-wine-800">Окна</h2>
+          <ul className="space-y-1 text-sm">
+            {counters.map((c) => <li key={c.id}>· {c.name}</li>)}
+          </ul>
+        </section>
+      </div>
 
-      <OperatorManager operators={operators} counters={counters} />
+      <div className="mt-8">
+        <OperatorManager operators={operators} counters={counters} />
+      </div>
 
       <AdminControls />
     </main>
@@ -53,9 +67,9 @@ export default async function AdminPage() {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border p-4">
-      <p className="text-gray-500">{label}</p>
-      <p className="text-3xl font-bold">{value}</p>
+    <div className="card rounded-2xl p-4">
+      <p className="tnum font-display text-3xl font-extrabold text-wine-700">{value}</p>
+      <p className="mt-1 text-xs text-ink-soft">{label}</p>
     </div>
   );
 }

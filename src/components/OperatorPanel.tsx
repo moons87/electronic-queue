@@ -22,39 +22,52 @@ export function OperatorPanel({ counter }: { counter: Counter }) {
   const run = (fn: () => Promise<unknown>) => () => start(() => { fn(); });
 
   return (
-    <main className="mx-auto max-w-md p-6">
-      <h1 className="text-xl font-bold">{counter.name}</h1>
-      <p className="text-gray-500">Ожидают: {waitingCount}</p>
-
-      <div className="my-6 rounded-xl border p-6 text-center">
-        <p className="text-gray-500">Сейчас обслуживается</p>
-        <p className="text-5xl font-extrabold">{current?.number ?? "—"}</p>
+    <main className="mx-auto max-w-md px-5 py-8">
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-wine-800">
+            {counter.name}
+          </h1>
+          <p className="text-sm text-ink-soft">Панель оператора</p>
+        </div>
+        <div className="text-right">
+          <p className="tnum text-2xl font-bold text-ink">{waitingCount}</p>
+          <p className="text-xs text-ink-soft">в ожидании</p>
+        </div>
       </div>
 
-      <p className="mb-2 text-gray-500">
-        Следующий: <b>{next?.number ?? "нет"}</b>
-      </p>
+      <div className="card my-6 rounded-3xl p-7 text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">
+          Сейчас обслуживается
+        </p>
+        <p className="tnum font-display mt-1 text-6xl font-extrabold text-wine-700">
+          {current?.number ?? "—"}
+        </p>
+        <p className="mt-3 text-sm text-ink-soft">
+          Следующий: <b className="tnum text-ink">{next?.number ?? "нет"}</b>
+        </p>
+      </div>
 
       <div className="flex flex-col gap-3">
         <button disabled={pending}
           onClick={run(() => callNextAction(counter.id))}
-          className="rounded-xl bg-blue-600 p-4 text-lg font-semibold text-white disabled:opacity-50">
+          className="btn-wine rounded-2xl p-4 text-lg font-semibold">
           Вызвать следующего
         </button>
         <div className="grid grid-cols-3 gap-2">
           <button disabled={pending || !current}
             onClick={run(() => recallAction(current!.id))}
-            className="rounded-xl bg-amber-500 p-3 font-semibold text-white disabled:opacity-40">
+            className="rounded-xl border border-brass-500 bg-brass-400/15 p-3 font-semibold text-brass-600 transition hover:bg-brass-400/25 disabled:opacity-40">
             Повторно
           </button>
           <button disabled={pending || !current}
             onClick={run(() => finishAction(current!.id))}
-            className="rounded-xl bg-green-600 p-3 font-semibold text-white disabled:opacity-40">
+            className="rounded-xl border border-wine-700/30 bg-wine-50 p-3 font-semibold text-wine-700 transition hover:bg-wine-100 disabled:opacity-40">
             Завершить
           </button>
           <button disabled={pending || !current}
             onClick={run(() => noShowAction(current!.id))}
-            className="rounded-xl bg-red-600 p-3 font-semibold text-white disabled:opacity-40">
+            className="rounded-xl border border-line bg-white p-3 font-semibold text-ink-soft transition hover:bg-paper-2 disabled:opacity-40">
             Не явился
           </button>
         </div>

@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---- Винно-академическая тема ---------------------------------------- */
+@theme {
+  /* Бордовая палитра */
+  --color-wine-50: #fbf1f2;
+  --color-wine-100: #f6dde0;
+  --color-wine-200: #ecbcc2;
+  --color-wine-300: #dd909b;
+  --color-wine-400: #c95f70;
+  --color-wine-500: #ae3a4e;
+  --color-wine-600: #8f2a3d;
+  --color-wine-700: #6f1d2e;  /* основной фирменный */
+  --color-wine-800: #551526;
+  --color-wine-900: #3d0e1b;
+
+  /* Латунь / золото — акцент */
+  --color-brass-400: #d9b566;
+  --color-brass-500: #c19a3e;
+  --color-brass-600: #a07e2c;
+
+  /* Бумага / чернила */
+  --color-paper: #faf5ee;
+  --color-paper-2: #f3eadd;
+  --color-ink: #241a18;
+  --color-ink-soft: #6f635f;
+  --color-line: #e6dccd;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --radius-xl2: 1.25rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Фон-бумага с лёгкой текстурой и тёплой виньеткой */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #faf5ee;
+  background-image:
+    radial-gradient(1200px 600px at 50% -200px, rgba(111, 29, 46, 0.06), transparent 70%),
+    radial-gradient(900px 500px at 110% 10%, rgba(193, 154, 62, 0.07), transparent 60%);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
+
+.font-display { font-family: var(--font-display); }
+
+/* Цифры талонов — моноширинные, чтобы не «прыгали» */
+.tnum { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+
+/* Тонкая золотая линия-разделитель */
+.rule-brass {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-brass-500), transparent);
+}
+
+/* Карточка-бумага */
+.card {
+  background: #fffdf9;
+  border: 1px solid var(--color-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 12px 30px -18px rgba(61, 14, 27, 0.35);
+}
+
+/* Главная винная кнопка */
+.btn-wine {
+  background: linear-gradient(180deg, var(--color-wine-600), var(--color-wine-700));
+  color: #fff;
+  border: 1px solid var(--color-wine-800);
+  box-shadow: 0 10px 20px -12px rgba(85, 21, 38, 0.7);
+  transition: transform 0.08s ease, filter 0.15s ease;
+}
+.btn-wine:hover { filter: brightness(1.06); }
+.btn-wine:active { transform: translateY(1px); }
+.btn-wine:disabled { opacity: 0.5; }
+
+/* Появление с лёгким подъёмом */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: riseIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Пульс для активного вызова на табло */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(193, 154, 62, 0.0); }
+  50% { box-shadow: 0 0 0 6px rgba(193, 154, 62, 0.25); }
+}
+.glow { animation: glow 1.6s ease-in-out infinite; }

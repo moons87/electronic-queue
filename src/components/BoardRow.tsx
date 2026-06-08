@@ -8,12 +8,17 @@ export function BoardRow({ ticket, counters, highlight }: {
   const counterName = counters.find((c) => c.id === ticket.counter_id)?.name ?? "—";
   return (
     <div
-      className={`flex items-center justify-between rounded-xl p-6 text-4xl font-bold ${
-        highlight ? "bg-yellow-300" : "bg-gray-100"
+      className={`flex items-center justify-between rounded-2xl px-8 py-6 transition ${
+        highlight
+          ? "glow bg-brass-400 text-wine-900"
+          : "bg-white/10 text-paper ring-1 ring-white/10"
       }`}
     >
-      <span>{ticket.number}</span>
-      <span className="text-3xl">→ {counterName}</span>
+      <span className="tnum font-display text-5xl font-extrabold">{ticket.number}</span>
+      <span className="flex items-center gap-3 text-3xl font-semibold">
+        <span className={highlight ? "text-wine-800/70" : "text-paper/50"}>→</span>
+        {counterName}
+      </span>
     </div>
   );
 }

@@ -49,45 +49,82 @@ export function TicketCard({
 
   const counterName =
     counters.find((c) => c.id === mine.counter_id)?.name ?? "";
+  const called = mine.status === "called" || mine.status === "serving";
 
   return (
-    <main className="mx-auto max-w-md p-6 text-center">
-      <p className="text-gray-500">Ваш номер</p>
-      <p className="my-2 text-6xl font-extrabold tracking-wider">{mine.number}</p>
-
-      {mine.status === "waiting" && (
-        <>
-          <p className="mt-6 text-xl">Перед вами: <b>{ahead}</b> чел.</p>
-          <p className="text-gray-500">≈ {wait} мин ожидания</p>
-          <p className="mt-4 text-3xl">⏳</p>
-          <button
-            disabled={leaving}
-            onClick={() => {
-              if (confirm("Покинуть очередь?")) {
-                startLeave(() => {
-                  leaveQueueAction(ticketId);
-                });
-              }
-            }}
-            className="mt-8 rounded-xl border border-red-300 p-3 text-red-600 disabled:opacity-50"
-          >
-            Покинуть очередь
-          </button>
-        </>
-      )}
-      {(mine.status === "called" || mine.status === "serving") && (
-        <div className="mt-6 rounded-xl bg-green-100 p-6">
-          <p className="text-2xl">🔔 Вас вызывают!</p>
-          <p className="mt-2 text-3xl font-bold">{counterName}</p>
+    <main className="mx-auto max-w-md px-5 py-10">
+      <div className="card rise overflow-hidden rounded-3xl text-center">
+        <div className="bg-wine-700 px-6 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-paper/80">
+            Ваш талон
+          </p>
         </div>
-      )}
-      {mine.status === "done" && <p className="mt-6 text-2xl">✅ Завершено</p>}
-      {mine.status === "no_show" && (
-        <p className="mt-6 text-2xl text-red-600">Вы не подошли вовремя</p>
-      )}
-      {mine.status === "cancelled" && (
-        <p className="mt-6 text-2xl text-gray-500">Вы покинули очередь</p>
-      )}
+
+        <div className="px-6 py-8">
+          <p
+            className={`tnum font-display text-7xl font-extrabold ${
+              called ? "text-wine-700" : "text-ink"
+            }`}
+          >
+            {mine.number}
+          </p>
+
+          {mine.status === "waiting" && (
+            <>
+              <div className="mt-6 flex items-stretch justify-center gap-3">
+                <div className="card rounded-2xl px-5 py-4">
+                  <p className="tnum text-3xl font-bold text-ink">{ahead}</p>
+                  <p className="text-xs text-ink-soft">перед вами</p>
+                </div>
+                <div className="card rounded-2xl px-5 py-4">
+                  <p className="tnum text-3xl font-bold text-ink">≈{wait}</p>
+                  <p className="text-xs text-ink-soft">минут ожидания</p>
+                </div>
+              </div>
+              <p className="mt-6 text-sm text-ink-soft">
+                Держите страницу открытой — мы подадим сигнал, когда подойдёт очередь.
+              </p>
+              <button
+                disabled={leaving}
+                onClick={() => {
+                  if (confirm("Покинуть очередь?")) {
+                    startLeave(() => {
+                      leaveQueueAction(ticketId);
+                    });
+                  }
+                }}
+                className="mt-6 rounded-xl border border-wine-700/25 px-4 py-2 text-sm font-semibold text-wine-700 transition hover:bg-wine-50 disabled:opacity-50"
+              >
+                Покинуть очередь
+              </button>
+            </>
+          )}
+
+          {called && (
+            <div className="glow mt-6 rounded-2xl border border-brass-400 bg-brass-400/15 p-6">
+              <p className="text-lg font-semibold text-wine-800">🔔 Вас вызывают</p>
+              <p className="font-display mt-1 text-4xl font-bold text-wine-700">
+                {counterName}
+              </p>
+              <p className="mt-2 text-sm text-ink-soft">Подойдите, пожалуйста</p>
+            </div>
+          )}
+
+          {mine.status === "done" && (
+            <p className="mt-6 text-xl font-semibold text-wine-700">
+              ✓ Обслуживание завершено
+            </p>
+          )}
+          {mine.status === "no_show" && (
+            <p className="mt-6 text-lg font-semibold text-wine-600">
+              Вызов пропущен — подойдите к стойке информации
+            </p>
+          )}
+          {mine.status === "cancelled" && (
+            <p className="mt-6 text-lg text-ink-soft">Вы покинули очередь</p>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
