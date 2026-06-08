@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
@@ -21,14 +21,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
-
-  // Уже вошли? Сразу в свою панель.
-  useEffect(() => {
-    const sb = createClient();
-    sb.auth.getUser().then(({ data: { user } }) => {
-      if (user) routeByRole(sb, user.id, router);
-    });
-  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

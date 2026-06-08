@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createAnonClient } from "@/lib/supabase/anon";
 import type { Ticket } from "@/lib/queue/types";
 
 export function useRealtimeTickets(serviceId?: string) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
   const refetch = useCallback(async () => {
-    const sb = createClient();
+    const sb = createAnonClient();
     const base = sb.from("tickets").select("*").order("created_at");
     const q = serviceId ? base.eq("service_id", serviceId) : base;
     const { data } = await q;
@@ -16,7 +16,7 @@ export function useRealtimeTickets(serviceId?: string) {
   }, [serviceId]);
 
   useEffect(() => {
-    const sb = createClient();
+    const sb = createAnonClient();
     refetch();
     const channel = sb
       .channel(`tickets-${serviceId ?? "all"}`)

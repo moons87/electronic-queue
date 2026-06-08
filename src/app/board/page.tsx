@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
-import { createClient } from "@/lib/supabase/client";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { BoardRow } from "@/components/BoardRow";
 import { brand } from "@/lib/brand";
 import { Logo } from "@/components/Logo";
@@ -14,7 +14,7 @@ export default function BoardPage() {
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
-    const sb = createClient();
+    const sb = createAnonClient();
     sb.from("counters").select("*").then(({ data }) => {
       if (data) setCounters(data as Counter[]);
     });
