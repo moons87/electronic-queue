@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Электронная очередь приёмной комиссии
 
-## Getting Started
+Next.js 16 + Supabase. Онлайн-очередь по направлениям: абитуриенты встают в очередь с
+телефона, операторы вызывают по своим окнам, табло в холле и страница абитуриента
+обновляются в реальном времени.
 
-First, run the development server:
+## Экраны
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Путь | Кто | Назначение |
+|------|-----|-----------|
+| `/` | Абитуриент | Выбор направления, получение талона |
+| `/ticket/[id]` | Абитуриент | Свой номер, позиция, сигнал при вызове |
+| `/board` | Табло | Большой экран в холле (для ТВ) |
+| `/login` → `/operator` | Оператор | Вызвать / Повторно / Завершить / Не явился |
+| `/admin` | Админ | Статистика за день, направления, окна, сброс дня |
+
+## Локальный запуск
+
+Требуется Node 20+ и Docker Desktop (для локальной Supabase).
+
+1. `npm install`
+2. `npx supabase start` — поднимет локальный Postgres/Realtime/Auth. Скопировать
+   `API URL`, `anon key`, `service_role key` в `.env.local` (шаблон — `.env.local.example`).
+3. `npx supabase db reset` — применит миграции (`supabase/migrations/`) и seed
+   (`supabase/seed.sql`: 2 направления, 3 окна).
+4. `npm run dev` → http://localhost:3000
+
+### Тестовые учётки (локально)
+
+Создаются через Supabase Studio (http://127.0.0.1:54323) или Auth Admin API,
+затем связываются строкой в таблице `operators`:
+
+```sql
+insert into operators (user_id, role, counter_id)
+values ('<user-id>', 'operator', (select id from counters where name='Окно 1'));
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Роль `admin` — то же с `role='admin'` и `counter_id` = null.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Тесты
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm test
+```
 
-## Learn More
+Покрыта чистая логика очереди: формат номера, «перед вами N», оценка ожидания, выбор
+следующего ожидающего.
 
-To learn more about Next.js, take a look at the following resources:
+## Архитектура
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Единый источник правды — таблица `tickets`. Все экраны подписаны на неё через
+  Supabase Realtime (`useRealtimeTickets`).
+- Критичные операции — Postgres RPC-функции (`supabase/migrations/0003_functions.sql`):
+  `create_ticket` (дневная нумерация), `call_next` (атомарный вызов через
+  `for update skip locked`), `recall_ticket`, `finish_ticket`, `no_show_ticket`,
+  `reset_day`.
+- Доступ ограничен через RLS (`0002_rls.sql`): абитуриент анонимно создаёт талон и
+  читает очередь; операторы меняют статусы только своего направления; админ — всё.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Деплой (Vercel + Supabase Cloud)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Создать проект в Supabase Cloud.
+2. `npx supabase link --project-ref <ref>` и `npx supabase db push` — применить миграции.
+   Загрузить направления/окна через Studio.
+3. Импортировать репозиторий в Vercel, задать переменные окружения
+   `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+4. Создать учётки операторов/админа в Supabase Auth, связать в таблице `operators`.
+5. Распечатать QR-код со ссылкой на корень сайта — повесить на входе для абитуриентов.
