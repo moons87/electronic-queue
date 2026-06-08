@@ -10,6 +10,12 @@ export async function createTicketAction(serviceId: string): Promise<Ticket> {
   return data as Ticket;
 }
 
+export async function leaveQueueAction(ticketId: string): Promise<void> {
+  const sb = await createClient();
+  const { error } = await sb.rpc("leave_queue", { p_ticket_id: ticketId });
+  if (error) throw new Error(error.message);
+}
+
 export async function callNextAction(counterId: string): Promise<Ticket | null> {
   const sb = await createClient();
   const { data, error } = await sb.rpc("call_next", { p_counter_id: counterId });

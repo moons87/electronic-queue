@@ -1,5 +1,5 @@
 export type TicketStatus =
-  | "waiting" | "called" | "serving" | "done" | "no_show";
+  | "waiting" | "called" | "serving" | "done" | "no_show" | "cancelled";
 
 export interface Service {
   id: string;

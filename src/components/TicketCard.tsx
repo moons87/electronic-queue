@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
 import { peopleAhead } from "@/lib/queue/position";
 import { estimateWaitMinutes } from "@/lib/queue/waitTime";
+import { leaveQueueAction } from "@/app/actions";
 import type { Ticket, Counter } from "@/lib/queue/types";
 
 export function TicketCard({
@@ -19,6 +20,14 @@ export function TicketCard({
   const ahead = peopleAhead(tickets, ticketId);
   const wait = estimateWaitMinutes(ahead, null);
   const wasCalled = useRef(false);
+  const [leaving, startLeave] = useTransition();
+
+  // Сохраняем талон, чтобы вернуться после закрытия вкладки.
+  useEffect(() => {
+    try {
+      localStorage.setItem("lastTicketId", ticketId);
+    } catch {}
+  }, [ticketId]);
 
   useEffect(() => {
     if ((mine.status === "called" || mine.status === "serving") && !wasCalled.current) {
@@ -51,6 +60,19 @@ export function TicketCard({
           <p className="mt-6 text-xl">Перед вами: <b>{ahead}</b> чел.</p>
           <p className="text-gray-500">≈ {wait} мин ожидания</p>
           <p className="mt-4 text-3xl">⏳</p>
+          <button
+            disabled={leaving}
+            onClick={() => {
+              if (confirm("Покинуть очередь?")) {
+                startLeave(() => {
+                  leaveQueueAction(ticketId);
+                });
+              }
+            }}
+            className="mt-8 rounded-xl border border-red-300 p-3 text-red-600 disabled:opacity-50"
+          >
+            Покинуть очередь
+          </button>
         </>
       )}
       {(mine.status === "called" || mine.status === "serving") && (
@@ -62,6 +84,9 @@ export function TicketCard({
       {mine.status === "done" && <p className="mt-6 text-2xl">✅ Завершено</p>}
       {mine.status === "no_show" && (
         <p className="mt-6 text-2xl text-red-600">Вы не подошли вовремя</p>
+      )}
+      {mine.status === "cancelled" && (
+        <p className="mt-6 text-2xl text-gray-500">Вы покинули очередь</p>
       )}
     </main>
   );
