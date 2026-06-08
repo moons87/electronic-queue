@@ -13,9 +13,13 @@ export default function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const sb = createClient();
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); return; }
-    router.push("/operator");
+
+    // Маршрутизируем по роли: админ → /admin, оператор → /operator.
+    const { data: profile } = await sb
+      .from("operators").select("role").eq("user_id", data.user.id).maybeSingle();
+    router.push(profile?.role === "admin" ? "/admin" : "/operator");
   }
 
   return (
