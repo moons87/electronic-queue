@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
+
+async function routeByRole(
+  sb: ReturnType<typeof createClient>,
+  userId: string,
+  router: ReturnType<typeof useRouter>,
+) {
+  const { data: profile } = await sb
+    .from("operators").select("role").eq("user_id", userId).maybeSingle();
+  router.push(profile?.role === "admin" ? "/admin" : "/operator");
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +21,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+
+  // Уже вошли? Сразу в свою панель.
+  useEffect(() => {
+    const sb = createClient();
+    sb.auth.getUser().then(({ data: { user } }) => {
+      if (user) routeByRole(sb, user.id, router);
+    });
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,9 +38,7 @@ export default function LoginPage() {
     if (error) { setError("Неверный email или пароль"); setBusy(false); return; }
 
     // Маршрутизируем по роли: админ → /admin, оператор → /operator.
-    const { data: profile } = await sb
-      .from("operators").select("role").eq("user_id", data.user.id).maybeSingle();
-    router.push(profile?.role === "admin" ? "/admin" : "/operator");
+    await routeByRole(sb, data.user.id, router);
   }
 
   return (
