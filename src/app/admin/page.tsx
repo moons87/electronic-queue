@@ -2,7 +2,9 @@ import { getOperatorProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveServices, getCounters } from "@/lib/db/queries";
 import { getDayStats } from "@/lib/db/stats";
+import { getOperatorList } from "@/lib/db/operators";
 import { AdminControls } from "./AdminControls";
+import { OperatorManager } from "./OperatorManager";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
@@ -13,8 +15,8 @@ export default async function AdminPage() {
   }
 
   const sb = await createClient();
-  const [services, counters, stats] = await Promise.all([
-    getActiveServices(sb), getCounters(sb), getDayStats(sb),
+  const [services, counters, stats, operators] = await Promise.all([
+    getActiveServices(sb), getCounters(sb), getDayStats(sb), getOperatorList(),
   ]);
 
   return (
@@ -41,6 +43,8 @@ export default async function AdminPage() {
           {counters.map((c) => <li key={c.id}>{c.name}</li>)}
         </ul>
       </section>
+
+      <OperatorManager operators={operators} counters={counters} />
 
       <AdminControls />
     </main>

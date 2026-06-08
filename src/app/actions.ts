@@ -1,7 +1,48 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getOperatorProfile } from "@/lib/auth";
 import type { Ticket } from "@/lib/queue/types";
+
+async function assertAdmin(): Promise<void> {
+  const profile = await getOperatorProfile();
+  if (!profile || profile.role !== "admin") throw new Error("forbidden");
+}
+
+// Создать сотрудника и привязать к окну. Только для админа.
+export async function createOperatorAction(input: {
+  email: string;
+  password: string;
+  role: "operator" | "admin";
+  counterId: string | null;
+}): Promise<{ error?: string }> {
+  await assertAdmin();
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
+    email: input.email,
+    password: input.password,
+    email_confirm: true,
+  });
+  if (error) return { error: error.message };
+
+  const { error: insErr } = await admin.from("operators").insert({
+    user_id: data.user.id,
+    role: input.role,
+    counter_id: input.role === "admin" ? null : input.counterId,
+  });
+  if (insErr) return { error: insErr.message };
+  return {};
+}
+
+// Удалить сотрудника (каскадом удалит и строку operators). Только для админа.
+export async function deleteOperatorAction(userId: string): Promise<{ error?: string }> {
+  await assertAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(userId);
+  if (error) return { error: error.message };
+  return {};
+}
 
 export async function createTicketAction(serviceId: string): Promise<Ticket> {
   const sb = await createClient();
