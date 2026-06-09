@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTicket, getCounters } from "@/lib/db/queries";
 import { TicketCard } from "@/components/TicketCard";
+import { getLang } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 
 export default async function TicketPage({
@@ -13,6 +14,7 @@ export default async function TicketPage({
   const ticket = await getTicket(sb, id);
   if (!ticket) notFound();
   const counters = await getCounters(sb);
+  const lang = await getLang();
 
   return (
     <TicketCard
@@ -20,6 +22,7 @@ export default async function TicketPage({
       serviceId={ticket.service_id}
       initial={ticket}
       counters={counters}
+      lang={lang}
     />
   );
 }

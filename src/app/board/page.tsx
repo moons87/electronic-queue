@@ -4,16 +4,21 @@ import { useEffect, useState } from "react";
 import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { BoardRow } from "@/components/BoardRow";
+import { LangToggle } from "@/components/LangToggle";
 import { brand } from "@/lib/brand";
 import { Logo } from "@/components/Logo";
+import { readLangCookie, tFor, type Lang } from "@/lib/i18n";
 import type { Counter, Service } from "@/lib/queue/types";
 
 export default function BoardPage() {
   const { tickets } = useRealtimeTickets();
   const [counters, setCounters] = useState<Counter[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [lang, setLang] = useState<Lang>("ru");
+  const t = tFor(lang);
 
   useEffect(() => {
+    setLang(readLangCookie());
     const sb = createAnonClient();
     sb.from("counters").select("*").then(({ data }) => {
       if (data) setCounters(data as Counter[]);
@@ -41,13 +46,16 @@ export default function BoardPage() {
       }}
     >
       <header className="mb-7 flex items-center justify-center gap-4">
+        <div className="absolute right-10 top-8">
+          <LangToggle dark />
+        </div>
         <Logo size={64} chip />
         <div className="text-center">
           <h1 className="font-display text-5xl font-extrabold tracking-tight">
             {brand.fullName}
           </h1>
           <p className="text-sm uppercase tracking-[0.3em] text-brass-400">
-            Приёмная комиссия · очередь
+            {t.boardSub}
           </p>
         </div>
       </header>
@@ -58,15 +66,20 @@ export default function BoardPage() {
         {/* Вызывают */}
         <section>
           <h2 className="mb-4 text-center text-sm uppercase tracking-[0.3em] text-brass-400 lg:text-left">
-            Приглашаем к окну
+            {t.inviteToWindow}
           </h2>
           <div className="flex flex-col gap-4">
-            {called.map((t, i) => (
-              <BoardRow key={t.id} ticket={t} counters={counters} highlight={i === 0} />
+            {called.map((ticket, i) => (
+              <BoardRow
+                key={ticket.id}
+                ticket={ticket}
+                counters={counters}
+                highlight={i === 0}
+              />
             ))}
             {called.length === 0 && (
               <p className="rounded-2xl bg-white/5 py-10 text-center text-2xl text-paper/40">
-                Ожидание вызовов…
+                {t.waitingCalls}
               </p>
             )}
           </div>
@@ -75,7 +88,7 @@ export default function BoardPage() {
         {/* В очереди */}
         <section>
           <h2 className="mb-4 text-center text-sm uppercase tracking-[0.3em] text-brass-400 lg:text-left">
-            В очереди
+            {t.inQueue}
           </h2>
           <div className="flex flex-col gap-4">
             {services.map((s) => {
@@ -84,19 +97,19 @@ export default function BoardPage() {
                 <div key={s.id} className="rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
                   <p className="mb-2 text-sm font-semibold text-paper/70">{s.name}</p>
                   {waiting.length === 0 ? (
-                    <p className="text-paper/30">— нет ожидающих</p>
+                    <p className="text-paper/30">{t.noWaiting}</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {waiting.slice(0, 12).map((t, i) => (
+                      {waiting.slice(0, 12).map((w, i) => (
                         <span
-                          key={t.id}
+                          key={w.id}
                           className={`tnum rounded-lg px-3 py-1.5 text-xl font-bold ${
                             i === 0
                               ? "bg-brass-400/25 text-brass-400 ring-1 ring-brass-400/40"
                               : "bg-white/10 text-paper/80"
                           }`}
                         >
-                          {t.number}
+                          {w.number}
                         </span>
                       ))}
                       {waiting.length > 12 && (
@@ -110,7 +123,7 @@ export default function BoardPage() {
               );
             })}
             {services.length === 0 && (
-              <p className="text-paper/30">Нет направлений</p>
+              <p className="text-paper/30">{t.noServicesShort}</p>
             )}
           </div>
         </section>

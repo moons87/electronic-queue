@@ -2,12 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveServices } from "@/lib/db/queries";
 import { createTicketAction } from "@/app/actions";
 import { brand } from "@/lib/brand";
+import { getLang } from "@/lib/i18n.server";
+import { tFor } from "@/lib/i18n";
 import { ArrowRight } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
   const sb = await createClient();
   const services = await getActiveServices(sb);
+  const t = tFor(await getLang());
 
   async function take(formData: FormData) {
     "use server";
@@ -23,11 +26,9 @@ export default async function HomePage() {
           {brand.fullName}
         </p>
         <h1 className="font-display mt-3 text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
-          Электронная очередь
+          {t.queueTitle}
         </h1>
-        <p className="mt-3 text-ink-soft">
-          Выберите направление — получите талон и следите за очередью с телефона.
-        </p>
+        <p className="mt-3 text-ink-soft">{t.homeSubtitle}</p>
       </div>
 
       <div className="rule-brass mx-auto my-8 w-40" />
@@ -50,16 +51,14 @@ export default async function HomePage() {
               </span>
               <span className="flex-1">
                 <span className="block text-lg font-bold text-ink">{s.name}</span>
-                <span className="block text-sm text-ink-soft">
-                  Нажмите, чтобы встать в очередь
-                </span>
+                <span className="block text-sm text-ink-soft">{t.tapToJoin}</span>
               </span>
               <ArrowRight className="size-5 text-wine-600 transition group-hover:translate-x-1" aria-hidden />
             </button>
           </form>
         ))}
         {services.length === 0 && (
-          <p className="text-center text-ink-soft">Сейчас нет открытых направлений.</p>
+          <p className="text-center text-ink-soft">{t.noServices}</p>
         )}
       </div>
     </main>

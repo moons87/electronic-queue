@@ -6,16 +6,19 @@ import { peopleAhead } from "@/lib/queue/position";
 import { estimateWaitMinutes } from "@/lib/queue/waitTime";
 import { leaveQueueAction } from "@/app/actions";
 import { Bell, BellRing, CheckCircle2, Hourglass } from "lucide-react";
+import { tFor, type Lang } from "@/lib/i18n";
 import type { Ticket, Counter } from "@/lib/queue/types";
 
 export function TicketCard({
-  ticketId, serviceId, initial, counters,
+  ticketId, serviceId, initial, counters, lang = "ru",
 }: {
   ticketId: string;
   serviceId: string;
   initial: Ticket;
   counters: Counter[];
+  lang?: Lang;
 }) {
+  const t = tFor(lang);
   const { tickets } = useRealtimeTickets(serviceId);
   const mine = tickets.find((t) => t.id === ticketId) ?? initial;
   const ahead = peopleAhead(tickets, ticketId);
@@ -88,7 +91,7 @@ export function TicketCard({
       <div className="card rise overflow-hidden rounded-3xl text-center">
         <div className="bg-wine-700 px-6 py-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-paper/80">
-            Ваш талон
+            {t.yourTicket}
           </p>
         </div>
 
@@ -106,16 +109,16 @@ export function TicketCard({
               <div className="mt-6 flex items-stretch justify-center gap-3">
                 <div className="card rounded-2xl px-5 py-4">
                   <p className="tnum text-3xl font-bold text-ink">{ahead}</p>
-                  <p className="text-xs text-ink-soft">перед вами</p>
+                  <p className="text-xs text-ink-soft">{t.ahead}</p>
                 </div>
                 <div className="card rounded-2xl px-5 py-4">
                   <p className="tnum text-3xl font-bold text-ink">≈{wait}</p>
-                  <p className="text-xs text-ink-soft">минут ожидания</p>
+                  <p className="text-xs text-ink-soft">{t.waitMinutes}</p>
                 </div>
               </div>
               <p className="mt-6 flex items-center justify-center gap-2 text-sm text-ink-soft">
                 <Hourglass className="size-4" aria-hidden />
-                Держите страницу открытой — мы подадим сигнал, когда подойдёт очередь.
+                {t.keepOpen}
               </p>
 
               <button
@@ -128,25 +131,23 @@ export function TicketCard({
               >
                 {soundOn ? (
                   <>
-                    <BellRing className="size-4" aria-hidden /> Звук включён
+                    <BellRing className="size-4" aria-hidden /> {t.soundOn}
                   </>
                 ) : (
                   <>
-                    <Bell className="size-4" aria-hidden /> Включить звук вызова
+                    <Bell className="size-4" aria-hidden /> {t.enableSound}
                   </>
                 )}
               </button>
               {!soundOn && (
-                <p className="mt-2 text-xs text-ink-soft">
-                  Нажмите один раз, чтобы услышать сигнал при вызове.
-                </p>
+                <p className="mt-2 text-xs text-ink-soft">{t.soundHint}</p>
               )}
 
               <div className="mt-6" />
               <button
                 disabled={leaving}
                 onClick={() => {
-                  if (confirm("Покинуть очередь?")) {
+                  if (confirm(t.leaveConfirm)) {
                     startLeave(() => {
                       leaveQueueAction(ticketId);
                     });
@@ -154,7 +155,7 @@ export function TicketCard({
                 }}
                 className="mt-6 rounded-xl border border-wine-700/25 px-4 py-2 text-sm font-semibold text-wine-700 transition hover:bg-wine-50 disabled:opacity-50"
               >
-                Покинуть очередь
+                {t.leave}
               </button>
             </>
           )}
@@ -162,18 +163,18 @@ export function TicketCard({
           {mine.status === "called" && (
             <div className="glow mt-6 rounded-2xl border border-brass-400 bg-brass-400/15 p-6">
               <p className="flex items-center justify-center gap-2 text-lg font-semibold text-wine-800">
-                <Bell className="size-5" aria-hidden /> Вас вызывают
+                <Bell className="size-5" aria-hidden /> {t.called}
               </p>
               <p className="font-display mt-1 text-4xl font-bold text-wine-700">
                 {counterName}
               </p>
-              <p className="mt-2 text-sm text-ink-soft">Подойдите, пожалуйста</p>
+              <p className="mt-2 text-sm text-ink-soft">{t.comeUp}</p>
             </div>
           )}
 
           {mine.status === "serving" && (
             <div className="mt-6 rounded-2xl border border-wine-700/20 bg-wine-50 p-6">
-              <p className="text-lg font-semibold text-wine-800">Идёт приём</p>
+              <p className="text-lg font-semibold text-wine-800">{t.serving}</p>
               <p className="font-display mt-1 text-4xl font-bold text-wine-700">
                 {counterName}
               </p>
@@ -182,16 +183,14 @@ export function TicketCard({
 
           {mine.status === "done" && (
             <p className="mt-6 flex items-center justify-center gap-2 text-xl font-semibold text-wine-700">
-              <CheckCircle2 className="size-6" aria-hidden /> Обслуживание завершено
+              <CheckCircle2 className="size-6" aria-hidden /> {t.done}
             </p>
           )}
           {mine.status === "no_show" && (
-            <p className="mt-6 text-lg font-semibold text-wine-600">
-              Вызов пропущен — подойдите к стойке информации
-            </p>
+            <p className="mt-6 text-lg font-semibold text-wine-600">{t.noShow}</p>
           )}
           {mine.status === "cancelled" && (
-            <p className="mt-6 text-lg text-ink-soft">Вы покинули очередь</p>
+            <p className="mt-6 text-lg text-ink-soft">{t.cancelled}</p>
           )}
         </div>
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { brand } from "@/lib/brand";
 import { Logo } from "@/components/Logo";
+import { LangToggle } from "@/components/LangToggle";
 import { createClient } from "@/lib/supabase/client";
 
 type Role = "operator" | "admin" | null;
@@ -70,22 +71,25 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        {isStaff && ready && role && (
-          <nav className="flex items-center gap-1 text-sm">
-            <Link href={panel.href} className={navLink}>
-              {panel.label}
-            </Link>
-            <Link href="/board" className={`hidden sm:block ${navLink}`}>
-              Табло
-            </Link>
-            <button
-              onClick={signOut}
-              className="rounded-lg border border-wine-700/30 px-4 py-2 font-semibold text-wine-700 transition hover:bg-wine-700 hover:text-paper"
-            >
-              Выйти
-            </button>
-          </nav>
-        )}
+        <div className="flex items-center gap-3">
+          <LangToggle />
+          {isStaff && ready && role && (
+            <nav className="flex items-center gap-1 text-sm">
+              <Link href={panel.href} className={navLink}>
+                {panel.label}
+              </Link>
+              <Link href="/board" className={`hidden sm:block ${navLink}`}>
+                Табло
+              </Link>
+              <button
+                onClick={signOut}
+                className="rounded-lg border border-wine-700/30 px-4 py-2 font-semibold text-wine-700 transition hover:bg-wine-700 hover:text-paper"
+              >
+                Выйти
+              </button>
+            </nav>
+          )}
+        </div>
       </div>
     </header>
   );
