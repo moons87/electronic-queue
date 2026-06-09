@@ -44,3 +44,6 @@ next-env.d.ts
 # local dev artifacts
 .shots/
 dev.log
+
+# supabase (SQL/схема — не нужны Vercel, держим только локально)
+/supabase/
