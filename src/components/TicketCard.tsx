@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
 import { peopleAhead } from "@/lib/queue/position";
 import { estimateWaitMinutes } from "@/lib/queue/waitTime";
 import { leaveQueueAction } from "@/app/actions";
-import { Bell, CheckCircle2, Hourglass } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, Hourglass } from "lucide-react";
 import type { Ticket, Counter } from "@/lib/queue/types";
 
 export function TicketCard({
@@ -21,7 +21,42 @@ export function TicketCard({
   const ahead = peopleAhead(tickets, ticketId);
   const wait = estimateWaitMinutes(ahead, null);
   const wasCalled = useRef(false);
+  const audioRef = useRef<AudioContext | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
   const [leaving, startLeave] = useTransition();
+
+  // Короткий «дзинь» из двух нот. Требует уже разблокированный AudioContext.
+  function chime(ctx: AudioContext) {
+    const now = ctx.currentTime;
+    [880, 1320].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      const t = now + i * 0.18;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.35, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      osc.start(t);
+      osc.stop(t + 0.36);
+    });
+  }
+
+  // Разблокировка звука по жесту пользователя (требование мобильных браузеров).
+  function enableSound() {
+    try {
+      const Ctx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      const ctx = audioRef.current ?? new Ctx();
+      audioRef.current = ctx;
+      void ctx.resume();
+      chime(ctx); // подтверждающий сигнал, что звук работает
+      setSoundOn(true);
+    } catch {}
+  }
 
   // Сохраняем талон, чтобы вернуться после закрытия вкладки.
   useEffect(() => {
@@ -33,14 +68,10 @@ export function TicketCard({
   useEffect(() => {
     if ((mine.status === "called" || mine.status === "serving") && !wasCalled.current) {
       wasCalled.current = true;
-      try {
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        osc.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch {}
+      const ctx = audioRef.current;
+      if (ctx) {
+        ctx.resume().then(() => chime(ctx)).catch(() => {});
+      }
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate([200, 100, 200]);
       }
@@ -86,6 +117,32 @@ export function TicketCard({
                 <Hourglass className="size-4" aria-hidden />
                 Держите страницу открытой — мы подадим сигнал, когда подойдёт очередь.
               </p>
+
+              <button
+                onClick={enableSound}
+                className={`mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  soundOn
+                    ? "bg-wine-50 text-wine-700"
+                    : "btn-wine"
+                }`}
+              >
+                {soundOn ? (
+                  <>
+                    <BellRing className="size-4" aria-hidden /> Звук включён
+                  </>
+                ) : (
+                  <>
+                    <Bell className="size-4" aria-hidden /> Включить звук вызова
+                  </>
+                )}
+              </button>
+              {!soundOn && (
+                <p className="mt-2 text-xs text-ink-soft">
+                  Нажмите один раз, чтобы услышать сигнал при вызове.
+                </p>
+              )}
+
+              <div className="mt-6" />
               <button
                 disabled={leaving}
                 onClick={() => {
