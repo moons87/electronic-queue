@@ -26,35 +26,51 @@ export default async function AdminPage() {
       </h1>
       <p className="mb-6 text-sm text-ink-soft">Статистика за сегодня и сотрудники</p>
 
-      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="Выдано талонов" value={stats.total} />
+        <Stat label="Ждут сейчас" value={stats.waitingNow} accent />
         <Stat label="Обслужено" value={stats.served} />
         <Stat label="Не явились" value={stats.noShow} />
+      </section>
+      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="На приёме" value={stats.servingNow} />
         <Stat label="Ср. ожидание" value={`${stats.avgWaitMin}м`} />
         <Stat label="Ср. приём" value={`${stats.avgServiceMin}м`} />
+        <Stat label="Час пик" value={stats.busiestHour ?? "—"} />
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <section className="card rounded-2xl p-5">
-          <h2 className="mb-3 font-semibold text-wine-800">Направления</h2>
-          <ul className="space-y-1 text-sm">
-            {services.map((s) => (
-              <li key={s.id} className="flex items-center gap-2">
-                <span className="font-display grid size-6 place-items-center rounded-md bg-wine-700 text-xs font-bold text-paper">
+      <section className="card mb-8 rounded-2xl p-5">
+        <h2 className="mb-3 font-semibold text-wine-800">Очередь по направлениям</h2>
+        <ul className="space-y-2 text-sm">
+          {services.map((s) => {
+            const load = stats.perService.find((p) => p.serviceId === s.id);
+            return (
+              <li key={s.id} className="flex items-center gap-3">
+                <span className="font-display grid size-6 shrink-0 place-items-center rounded-md bg-wine-700 text-xs font-bold text-paper">
                   {s.prefix}
                 </span>
-                {s.name}
+                <span className="flex-1">{s.name}</span>
+                <span className="tnum font-semibold text-wine-700">
+                  {load?.waiting ?? 0}
+                </span>
+                <span className="text-ink-soft">ждут</span>
+                {(load?.serving ?? 0) > 0 && (
+                  <span className="tnum rounded-full bg-brass-400/20 px-2 py-0.5 text-xs font-semibold text-wine-800">
+                    {load?.serving} на приёме
+                  </span>
+                )}
               </li>
-            ))}
-          </ul>
-        </section>
+            );
+          })}
+        </ul>
+      </section>
 
-        <section className="card rounded-2xl p-5">
-          <h2 className="mb-3 font-semibold text-wine-800">Окна</h2>
-          <ul className="space-y-1 text-sm">
-            {counters.map((c) => <li key={c.id}>· {c.name}</li>)}
-          </ul>
-        </section>
-      </div>
+      <section className="card rounded-2xl p-5">
+        <h2 className="mb-3 font-semibold text-wine-800">Окна</h2>
+        <ul className="space-y-1 text-sm">
+          {counters.map((c) => <li key={c.id}>· {c.name}</li>)}
+        </ul>
+      </section>
 
       <div className="mt-8">
         <OperatorManager operators={operators} counters={counters} />
@@ -65,9 +81,11 @@ export default async function AdminPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({
+  label, value, accent,
+}: { label: string; value: string | number; accent?: boolean }) {
   return (
-    <div className="card rounded-2xl p-4">
+    <div className={`card rounded-2xl p-4 ${accent ? "ring-1 ring-brass-400" : ""}`}>
       <p className="tnum font-display text-3xl font-extrabold text-wine-700">{value}</p>
       <p className="mt-1 text-xs text-ink-soft">{label}</p>
     </div>
