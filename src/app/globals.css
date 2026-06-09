@@ -45,6 +45,26 @@ body {
 
 .font-display { font-family: var(--font-display); }
 
+/* Видимое фокус-кольцо для навигации с клавиатуры (доступность) */
+:focus-visible {
+  outline: 2px solid var(--color-wine-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Уважаем prefers-reduced-motion: отключаем декоративные анимации */
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .glow {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Цифры талонов — моноширинные, чтобы не «прыгали» */
 .tnum { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 

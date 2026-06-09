@@ -5,6 +5,7 @@ import { useRealtimeTickets } from "@/hooks/useRealtimeTickets";
 import { peopleAhead } from "@/lib/queue/position";
 import { estimateWaitMinutes } from "@/lib/queue/waitTime";
 import { leaveQueueAction } from "@/app/actions";
+import { Bell, CheckCircle2, Hourglass } from "lucide-react";
 import type { Ticket, Counter } from "@/lib/queue/types";
 
 export function TicketCard({
@@ -81,7 +82,8 @@ export function TicketCard({
                   <p className="text-xs text-ink-soft">минут ожидания</p>
                 </div>
               </div>
-              <p className="mt-6 text-sm text-ink-soft">
+              <p className="mt-6 flex items-center justify-center gap-2 text-sm text-ink-soft">
+                <Hourglass className="size-4" aria-hidden />
                 Держите страницу открытой — мы подадим сигнал, когда подойдёт очередь.
               </p>
               <button
@@ -102,7 +104,9 @@ export function TicketCard({
 
           {mine.status === "called" && (
             <div className="glow mt-6 rounded-2xl border border-brass-400 bg-brass-400/15 p-6">
-              <p className="text-lg font-semibold text-wine-800">🔔 Вас вызывают</p>
+              <p className="flex items-center justify-center gap-2 text-lg font-semibold text-wine-800">
+                <Bell className="size-5" aria-hidden /> Вас вызывают
+              </p>
               <p className="font-display mt-1 text-4xl font-bold text-wine-700">
                 {counterName}
               </p>
@@ -120,8 +124,8 @@ export function TicketCard({
           )}
 
           {mine.status === "done" && (
-            <p className="mt-6 text-xl font-semibold text-wine-700">
-              ✓ Обслуживание завершено
+            <p className="mt-6 flex items-center justify-center gap-2 text-xl font-semibold text-wine-700">
+              <CheckCircle2 className="size-6" aria-hidden /> Обслуживание завершено
             </p>
           )}
           {mine.status === "no_show" && (

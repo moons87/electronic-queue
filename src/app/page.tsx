@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveServices } from "@/lib/db/queries";
 import { createTicketAction } from "@/app/actions";
 import { brand } from "@/lib/brand";
+import { ArrowRight } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
@@ -53,9 +54,7 @@ export default async function HomePage() {
                   Нажмите, чтобы встать в очередь
                 </span>
               </span>
-              <span className="text-wine-600 transition group-hover:translate-x-1">
-                →
-              </span>
+              <ArrowRight className="size-5 text-wine-600 transition group-hover:translate-x-1" aria-hidden />
             </button>
           </form>
         ))}

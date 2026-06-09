@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import type { Ticket, Counter } from "@/lib/queue/types";
 
 export function BoardRow({ ticket, counters, highlight }: {
@@ -16,7 +17,7 @@ export function BoardRow({ ticket, counters, highlight }: {
     >
       <span className="tnum font-display text-5xl font-extrabold">{ticket.number}</span>
       <span className="flex items-center gap-3 text-3xl font-semibold">
-        <span className={highlight ? "text-wine-800/70" : "text-paper/50"}>→</span>
+        <ArrowRight className={`size-7 ${highlight ? "text-wine-800/70" : "text-paper/50"}`} aria-hidden />
         {counterName}
       </span>
     </div>
