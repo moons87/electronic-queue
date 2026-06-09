@@ -28,4 +28,5 @@ export interface Ticket {
   called_at: string | null;
   served_at: string | null;
   finished_at: string | null;
+  device_id: string | null;
 }

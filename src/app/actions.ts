@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getOperatorProfile } from "@/lib/auth";
@@ -46,7 +47,25 @@ export async function deleteOperatorAction(userId: string): Promise<{ error?: st
 
 export async function createTicketAction(serviceId: string): Promise<Ticket> {
   const sb = await createClient();
-  const { data, error } = await sb.rpc("create_ticket", { p_service_id: serviceId });
+
+  // Идентификатор устройства в httpOnly-cookie: ограничивает 1 активный талон
+  // на направление и не даёт случайно/намеренно наспамить очередь.
+  const jar = await cookies();
+  let device = jar.get("qid")?.value;
+  if (!device) {
+    device = crypto.randomUUID();
+    jar.set("qid", device, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
+  const { data, error } = await sb.rpc("create_ticket", {
+    p_service_id: serviceId,
+    p_device_id: device,
+  });
   if (error) throw new Error(error.message);
   return data as Ticket;
 }

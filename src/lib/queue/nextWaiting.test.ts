@@ -7,6 +7,7 @@ function t(p: Partial<Ticket>): Ticket {
     id: "x", service_id: "s", seq: 1, number: "A-001", status: "waiting",
     counter_id: null, recall_count: 0, service_day: "2026-06-08",
     created_at: "2026-06-08T10:00:00Z", called_at: null, served_at: null, finished_at: null,
+    device_id: null,
     ...p,
   };
 }
